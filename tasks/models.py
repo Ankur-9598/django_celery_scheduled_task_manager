@@ -1,4 +1,5 @@
 
+from email.policy import default
 from django.db import models
 
 from django.contrib.auth.models import User
@@ -40,3 +41,4 @@ class TaskReport(models.Model):
     user_mail = models.EmailField(null=True)
     report_time = models.TimeField(auto_now=False, auto_now_add=False, default="12:00:00")
     next_run_at = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
+    enabled = models.BooleanField(default=True)

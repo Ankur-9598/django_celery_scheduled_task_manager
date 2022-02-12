@@ -43,6 +43,11 @@
             </ul>
         </div>
 
+        <div class="fieldWrapper">
+            <input type="checkbox" class="w-[20px] h-[20px] mt-[8px] border-0 rounded-[12px] accent-slate-400 pl-[8px] focus:outline-none" name="{{form.enabled.html_name}}" id="{{form.enabled.auto_id}}" {% if form.enabled.value %} checked {% endif %}>
+            <label for="{{ form.enabled.id_for_label }}" class="inline-block text-lg font-medium mb-[4px] ml-[10px]">Enable</label>
+        </div>
+
         <button class="bg-[#EF4444] w-[400px] h-[42px] rounded-[12px] text-white mt-12" type="submit">Schedule Report</button>
     </form>
 {% endblock %}

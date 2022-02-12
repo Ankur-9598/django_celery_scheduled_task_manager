@@ -151,7 +151,7 @@ class TaskReportCreateForm(ModelForm):
 
     class Meta:
         model = TaskReport
-        fields = ['user_mail', 'report_time']
+        fields = ['user_mail', 'report_time', 'enabled']
 
 class GenericTaskReportCreateView(LoginRequiredMixin, CreateView):
     form_class = TaskReportCreateForm

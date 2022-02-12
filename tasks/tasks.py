@@ -15,8 +15,8 @@ def send_email_report():
     for user in User.objects.all():
         curr_user_task_report = TaskReport.objects.filter(user=user)
 
-        # if user has scheduled tasks
-        if curr_user_task_report.exists():
+        # if user has created configuration and enabled it
+        if curr_user_task_report.exists() and curr_user_task_report[0].enabled:
 
             task_report = TaskReport.objects.get(user=user)
             curr_time = datetime.now(tz=timezone('UTC'))
