@@ -13,7 +13,11 @@ You are asked to build the same project we worked on [Django REST_API Task manag
 1. ```/report``` :- For creating the report configuration
 2. ```/update-report``` :- For updating the report configuration
 
-The background jobs are executed with the help of celery workers.
+### The background jobs are executed by CELERY worker
+
+To start celery beat run ```celery -A tasks_manager beat -l info```
+
+To start celery worker run ```celery -A tasks_manager worker --pool=solo -l info```
 
 ## Run Locally
 
