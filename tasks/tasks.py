@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta
 
 from celery import shared_task
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from pytz import timezone
 
@@ -12,32 +11,29 @@ from tasks.models import Task, TaskReport
 @shared_task(name="send_periodic_reportes_to_user")
 def send_email_report():
 
-    for user in User.objects.all():
-        curr_user_task_report = TaskReport.objects.filter(user=user)
+    curr_time = datetime.now(tz=timezone('UTC'))
+    # Get the schedules that is enabled and sending is due
+    curr_schedules = TaskReport.objects.filter(enabled=True, next_run_at__lte=curr_time)
 
-        # if user has created configuration and enabled it
-        if curr_user_task_report.exists() and curr_user_task_report[0].enabled:
+    for schedule in curr_schedules:
+        user = schedule.user
+        user_mail = schedule.user_mail
 
-            task_report = TaskReport.objects.get(user=user)
-            curr_time = datetime.now(tz=timezone('UTC'))
+        # Get the email content and send the mail
+        email_content = get_user_tasks_status(user)
+        send_mail("Tasks Report for Today", email_content, "rt945471@gmail.com", [user_mail])
 
-            # if report time has didn't reached yet..  continue
-            if task_report.next_run_at > curr_time:
-                continue
-            
-            # Get the email content and send the mail
-            email_content = get_user_tasks_status(user)
-            send_mail("Tasks Report for Today", email_content, "rt945471@gmail.com", [task_report.user_mail])
-
-            # Update the next run at for the current user task report
-            next_run_at = task_report.next_run_at + timedelta(days=1)
-            curr_user_task_report.update(next_run_at=next_run_at)
+        # Update the next run at for the current user task report
+        next_run_at = schedule.next_run_at + timedelta(days=1)
+        TaskReport.objects.filter(user=user).update(next_run_at=next_run_at)
 
 
 def get_user_tasks_status(user):
-    total_tasks = Task.objects.filter(user=user, deleted=False)
-    pending_tasks = total_tasks.filter(completed=False).count()
-    completed_tasks = total_tasks.count() - pending_tasks
-    greeting = f"Hi {user.username},\n\nHere is your tasks report:\n\nTotal tasks added: {len(total_tasks)}\nPending tasks: {pending_tasks}\nCompleted tasks: {completed_tasks}\n\nThanks"
-    return greeting
+    total_tasks = Task.objects.filter(user=user)
+    pending_tasks = total_tasks.filter(status='PENDING').count()
+    completed_tasks = total_tasks.filter(status='COMPLETED').count()
+    in_progress_tasks = total_tasks.filter(status='IN_PROGRESS').count()
+    cancelled_tasks = total_tasks.filter(status='CANCELLED').count()
+    message = f"Hi {user.username},\n\nHere is your tasks report for today:\n\nTotal tasks added: {total_tasks.count()}\nPending tasks: {pending_tasks}\nIn Progress tasks: {in_progress_tasks}\nCompleted tasks: {completed_tasks}\nCancelled tasks: {cancelled_tasks}\n\nThanks"
+    return message
 
