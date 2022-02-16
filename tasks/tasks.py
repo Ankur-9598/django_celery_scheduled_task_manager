@@ -29,7 +29,7 @@ def send_email_report():
 
 
 def get_user_tasks_status(user):
-    total_tasks = Task.objects.filter(user=user)
+    total_tasks = Task.objects.filter(user=user, deleted=False)
     pending_tasks = total_tasks.filter(status='PENDING').count()
     completed_tasks = total_tasks.filter(status='COMPLETED').count()
     in_progress_tasks = total_tasks.filter(status='IN_PROGRESS').count()
